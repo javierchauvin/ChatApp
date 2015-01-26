@@ -1,57 +1,157 @@
 <!doctype html>
 <html>
-  <head>
-    <title>FSE ChatRoom</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Courier, Courier; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(51, 102, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
-  </head>
-  <body>
-    <ul id="messages"></ul>
+<head>
+  <title>SFE ChatRoom</title>
+  <style>
 
-    <!-- <ul class="pages">
-      <li class="chat page">
-        <div class="chatArea">
-          <ul class="messages"></ul>
-        </div>
-        <input class="inputMessage" placeholder="Type here..."/>
-      </li>
-      <li class="login page">
-        <div class="form">
-          <h3 class="title">What's your nickname?</h3>
-          <input class="usernameInput" type="text" maxlength="14" />
-        </div>
-      </li>
-    </ul> -->
+  * { margin: 0; padding: 0; box-sizing: border-box; background: rgb(32,32,32);}
+  body { font: 13px Helvetica, Arial; }
+  form { background: rgb(32,32,32); padding: 3px; position: fixed; bottom: 25px; width: 100%; }
+  form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+  form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
 
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
+  .messages {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    background: rgb(32,32,32);
+    color: #000;
+  }
+  .messages li {
+    padding: 5px 10px;
+    color: rgb(0,155,77);
+    }
+
+  #Chat .Logout{
+    text-align: center;
+    color: lightblue;
+    position: fixed;
+    bottom:0px;
+    background: solid rgb(130, 224, 255)
+  }
+
+  #Chat{
+    color: rgb(32,32,32);
+  }
+
+  #Chat .ChatArea #m{
+    color: rgb(32,32,32);
+    background: rgb(255,255,255);
+    fontsize: 300%
+  }
+
+    #LogIn {
+      background: white;
+      color: darkblue
+    }
+
+    #LogIn .form {
+      height: 100px;
+      margin-top: -100px;
+      position: absolute;
+
+      text-align: center;
+      top: 50%;
+      width: 100%;
+    }
+
+    #LogIn #frm_ULogin {
+      background-color: solid;
+      border: none;
+      border-bottom: 2px solid #aaa;
+      outline: none;
+      padding-bottom: 15px;
+      text-align: center;
+      width: 400px;
+    }
+
+    #LogIn .title {
+      font-size: 200%;
+    }
+
+    #LogIn #usernameInput {
+      font-size: 200%;
+      letter-spacing: 3px;
+      color: rgb(0,155,255);
+      font-weight: 100;
+    }
+
+    #LogIn .title{
+      color: rgb(0,155,255);
+      font-weight: 100;
+    }
+
+    #LogIn #LoginBut{
+      color: rgb(0,155,255);
+      border: 1px solid rgb(0,155,255);
+      font-size: 150%;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="LogIn">
+    <div class="form">
+      <h3 class="title">Enter your name!</h3>
+        <input type="text" id="usernameInput" maxlength="14" />
+        <br><br>
+        <input type="button" id="LoginBut" value="Login" onclick="return LoginUser();" />
+    </div>
+  </div>
+  <div id="Chat" style="display:none">
+    <ul class="messages"></ul>
+    <form class="ChatArea" action="">
+      <input id="m" autocomplete="off" placeholder="Type here..."/><button>Send</button>
     </form>
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <!-- // <script src="/chat.js"></script> -->
-    <script>
+    <a href="#" class="Logout" onclick="return Logout();"><H2>Logout</H2></a>
+  </div>
 
-      var socket = io();
+  <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
 
-      ('form').submit(function(){
-        socket.emit('chat message', $('#m').val());
-        $('#m').val('');
-        return false;
-      });
+  var username = "camo";
+  var socket = io();
+  var date;
 
-      socket.on('chat message', function(msg){
-        $('#messages').append($('<li>').text(msg));
-        });
+  function show(shown, hidden) {
+    document.getElementById(shown).style.display='block';
+    document.getElementById(hidden).style.display='none';
+    return false;
+  }
 
-    </script>
-  </body>
-</html>
+  function Logout(){
+    show('LogIn','Chat');
+    // socket.emit('disconnect');
+    $('#usernameInput').val('');
+    return false;
+  }
+
+  function LoginUser() {
+
+    username = document.getElementById('usernameInput').value;
+
+    if (username) {
+      // socket.emit('add user', username);
+      show('Chat','LogIn');
+      $('#usernameInput').val('');
+    } else {
+        alert ('Please enter your name');
+    }
+    return false;
+  }
+
+  $('form').submit(function(){
+    date = new Date;
+    socket.emit('chat message', '('+date.getHours()+':'+date.getMinutes()+') '+username+' - '+$('#m').val() );
+    $('#m').val('');
+    return false;
+  });
+
+  socket.on('chat message', function(msg){
+    $('.messages').append($('<li>').text(msg));
+  });
+
+  </script>
+</body>
